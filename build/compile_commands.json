@@ -1,0 +1,7 @@
+[
+{
+  "directory": "C:/Users/daruma/vscode-source/cpp/test-parse/build",
+  "command": "C:\\Users\\daruma\\bin\\.gcc\\mingw32\\bin\\g++.exe   -g -o CMakeFiles\\test-parse.dir\\src\\main.cc.obj -c C:\\Users\\daruma\\vscode-source\\cpp\\test-parse\\src\\main.cc",
+  "file": "C:/Users/daruma/vscode-source/cpp/test-parse/src/main.cc"
+}
+]

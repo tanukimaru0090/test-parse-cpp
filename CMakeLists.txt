@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.2)
+set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ../bin)
+project("test-parse")
+add_executable(test-parse src/main.cc)
