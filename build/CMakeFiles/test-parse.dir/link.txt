@@ -1,3 +1,0 @@
-C:\Users\daruma\bin\.cmake\CMake\bin\cmake.exe -E rm -f CMakeFiles\test-parse.dir/objects.a
-C:\Users\daruma\bin\.gcc\mingw32\bin\ar.exe qc CMakeFiles\test-parse.dir/objects.a @CMakeFiles\test-parse.dir\objects1.rsp
-C:\Users\daruma\bin\.gcc\mingw32\bin\g++.exe -g -Wl,--whole-archive CMakeFiles\test-parse.dir/objects.a -Wl,--no-whole-archive -o C:\Users\daruma\vscode-source\cpp\test-parse\bin\test-parse.exe -Wl,--out-implib,libtest-parse.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\test-parse.dir\linklibs.rsp

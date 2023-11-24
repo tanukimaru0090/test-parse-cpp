@@ -1,3 +1,3 @@
-C:/Users/daruma/vscode-source/cpp/test-parse/build/CMakeFiles/test-parse.dir
-C:/Users/daruma/vscode-source/cpp/test-parse/build/CMakeFiles/edit_cache.dir
-C:/Users/daruma/vscode-source/cpp/test-parse/build/CMakeFiles/rebuild_cache.dir
+/home/daruma/nvim-source/cpp/test-parse-cpp/build/CMakeFiles/test-parse.dir
+/home/daruma/nvim-source/cpp/test-parse-cpp/build/CMakeFiles/edit_cache.dir
+/home/daruma/nvim-source/cpp/test-parse-cpp/build/CMakeFiles/rebuild_cache.dir
