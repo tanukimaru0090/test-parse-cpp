@@ -21,6 +21,13 @@ enum class PrintColors {
 };
 
 enum class TokenType {
+    Let,         // 変数宣言キーワード
+    Eq,          // 等しい
+    NotEq,       // 等しくない
+    Lt,          // より小さい
+    Le,          // 以下
+    Gl,          // より大きい
+    Ge,          // 以上
     Ident,       // 識別子
     IntValue,    // 整数リテラル
     Add,         // 加算
@@ -30,8 +37,8 @@ enum class TokenType {
     LeftParen,   // 左括弧
     RightParen,  // 右括弧
     NewLine,     // 改行
+    Semicolon,   // セミコロン
     Eof,         // 入力の終わり
-
 };
 struct Token {
     int line, column;
@@ -46,10 +53,8 @@ struct Token {
 };
 class Lex {
    public:
-    Lex(std::string input) : input(input) {
-        this->index = 0;
-        this->line = 1;
-        this->column = 0;
+    Lex(std::string input) : input(input),index(0),line(1),column(0) {
+    
     }
     char currentChar() { return input[index]; }
 
@@ -98,6 +103,22 @@ class Lex {
         }
         return Token(TokenType::IntValue, value, line, column);
     }
+    // 識別子やキーワードを読み込むメソッド
+    Token readIdent() {
+        std::string value = "";
+        while (isalpha(currentChar()) || isdigit(currentChar()) ||
+               currentChar() == '_') {
+            value += currentChar();
+            nextChar();
+        }
+        TokenType type;
+        if (value == "let") {
+            type = TokenType::Let;
+        } else {
+            type = TokenType::Ident;
+        }
+        return Token(type, value, line, column);
+    }
     bool isEof() { return index >= input.size(); }
     Token nextToken() {
         symbolSkip();
@@ -107,6 +128,8 @@ class Lex {
         } else if (c == '\r' || c == '\n') {
             nextChar();
             return Token(TokenType::NewLine, "\\n", line, column);
+        } else if (isalpha(c) || c == '_') {
+            return readIdent();
         } else if (isdigit(c)) {
             return readIntLiteral();
         } else if (c == '+') {
@@ -127,6 +150,9 @@ class Lex {
         } else if (c == ')') {
             nextChar();
             return Token(TokenType::RightParen, ")", line, column);
+        } else if (c == ';') {
+            nextChar();
+            return Token(TokenType::Semicolon, ";", line, column);
         } else {
             std::cerr << "Invalid charctor:" << c << std::endl;
             exit(1);
@@ -173,6 +199,34 @@ std::string tokenTypeToString(TokenType type) {
         case TokenType::NewLine:
             temp += "NewLine";
             break;
+        case TokenType::Ident:
+            temp += "Ident";
+            break;
+        case TokenType::Let:
+            temp += "Let";
+            break;
+        case TokenType::Semicolon:
+            temp += "Semicolon";
+            break;
+        case TokenType::Eq:
+            temp += "Eq";
+            break;
+        case TokenType::NotEq:
+            temp += "NotEq";
+            break;
+        case TokenType::Lt:
+            temp += "Lt";
+            break;
+        case TokenType::Le:
+            temp += "NewLine";
+            break;
+        case TokenType::Gl:
+            temp += "Gl";
+            break;
+        case TokenType::Ge:
+            temp += "Ge";
+            break;
+
         default:
             temp += "Error";
             break;
@@ -250,6 +304,13 @@ void printAllLexData(std::vector<Token>& tokens) {
 }
 
 enum class NodeType {
+    Eq,          // 等しい
+    NotEq,       // 等しくない
+    Lt,          // より小さい
+    Le,          // 以下
+    Gl,          // より大きい
+    Ge,          // 以上
+    Variable,    // 変数
     Assign,      // 代入
     IntValue,    // 整数リテラル
     Add,         // 加算
@@ -275,14 +336,29 @@ class Parser {
     Parser(std::vector<Token>& tokens) : tokens(tokens), index(0) {}
     Token currentTokens() { return tokens[index]; }
     void nextTokens() { index += 1; }
+    Node* primary() {
+        if (currentTokens().type == TokenType::Ident) {
+            Node* node = new Node(NodeType::Variable, nullptr, nullptr);
+            return node;
+        }
+    }
+    Node* relational() {}
+    Node* equality() {
+        Node* node = relational();
+        while (true) {
+            if (currentTokens().type == TokenType::Eq) {
+                //} else if () {
+                //} else if () {
+            } else {
+                return node;
+            }
+        }
+    }
     Node* assign() {
         // Node* node =
     }
     Node* stmt() {}
-    Node* parseProgram() {
-        while (true) {
-        }
-    }
+    Node* parseProgram() {}
     Node* expr() {
         Node* node = mul();
         while (true) {
@@ -302,21 +378,21 @@ class Parser {
     }
 
     Node* mul() {
-        Node* node = primary();
+        Node* node = paren();
         while (true) {
             if (currentTokens().type == TokenType::Mul) {
                 nextTokens();
-                node = new Node(NodeType::Mul, node, primary());
+                node = new Node(NodeType::Mul, node, paren());
             } else if (currentTokens().type == TokenType::Div) {
                 nextTokens();
-                node = new Node(NodeType::Div, node, primary());
+                node = new Node(NodeType::Div, node, paren());
             } else {
                 return node;
             }
         }
     }
 
-    Node* primary() {  // 次のトークンが"(“なら、”(" expr ")"のはず
+    Node* paren() {  // 次のトークンが"(“なら、”(" expr ")"のはず
         if (currentTokens().type == TokenType::LeftParen) {
             nextTokens();  // 左括弧を読み飛ばす
             Node* node = expr();
@@ -337,7 +413,17 @@ class Parser {
     int index;
     std::vector<Token> tokens;
 };
-
+void deleteNode(Node* node) {
+    // 左右のサブツリーを順番に開放
+    if (node->left != nullptr) {
+        deleteNode(node->left);
+    }
+    if (node->right != nullptr) {
+       deleteNode(node->right);
+    }
+    delete node;
+}
+void deleteNodeLists(std::vector<Node*>& nodeLists) {}
 std::string nodeTypeToString(const NodeType& type) {
     std::string temp = "";
     switch (type) {
@@ -359,6 +445,28 @@ std::string nodeTypeToString(const NodeType& type) {
         case NodeType::Program:
             temp += "Program";
             break;
+        case NodeType::Variable:
+            temp += "Variable";
+            break;
+        case NodeType::Eq:
+            temp += "Eq";
+            break;
+        case NodeType::NotEq:
+            temp += "NotEq";
+            break;
+        case NodeType::Lt:
+            temp += "Lt";
+            break;
+        case NodeType::Le:
+            temp += "NewLine";
+            break;
+        case NodeType::Gl:
+            temp += "Gl";
+            break;
+        case NodeType::Ge:
+            temp += "Ge";
+            break;
+
         default:
             temp += "Error";
             break;
@@ -431,10 +539,12 @@ int main(int argc, char** argv) {
     Lex lex(input);
     auto tokens = lex.tokenize();
     // トークン化されたデータを表示
-    　printAllLexData(tokens);
+    printAllLexData(tokens);
     // パース
     Parser parser(tokens);
     auto node1 = parser.expr();
+    auto node2 = parser.expr();
     // パース済みのデータを表示
     printAllNodeTree(node1);
+    deleteNode(node1);
 }
